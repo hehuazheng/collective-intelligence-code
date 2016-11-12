@@ -76,6 +76,26 @@ def makerandomtree(pc, maxdepth=4, fpr=0.5, ppr=0.6):
 		return paramnode(randint(0, pc-1))
 	else:
 		return constnode(randint(0,10))
+
+def hiddenfunction(x,y):
+	return x**2 + 2*y + 3*x + 5
+	
+def buildhiddenset():
+	rows=[]
+	for i in range(200):
+		x = randint(0,40)
+		y = randint(0,40)
+		rows.append([x,y, hiddenfunction(x,y)])
+	return rows
+	
+def scorefunction(tree, s):
+	dif=0
+	for data in s:
+		v=tree.evaluate([data[0], data[1]])
+		dif += abs(v - data[2])
+	return dif
 #main
 #exampletree  = exampletree()
 #exampletree.evaluate([2,3])
+
+#step2 use makerandomtree to create tree
