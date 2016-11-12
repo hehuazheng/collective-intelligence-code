@@ -19,12 +19,20 @@ class node:
 		results = [n.evaluate(inp) for n in self.children]
 		return self.function(results)
 		
+	def display(self, indent=0):
+		print (' '*indent) + self.name
+		for c in self.children:
+			c.display(indent + 1)
+		
 class paramnode:
 	def __init__(self, idx):
 		self.idx = idx
 		
 	def evaluate(self, inp):
 		return inp[self.idx]
+		
+	def display(self, indent=0):
+		print '%sp%d' %(' '*indent, self.idx)
 
 class constnode:
 	def __init__(self, v):
@@ -32,6 +40,9 @@ class constnode:
 		
 	def evaluate(self, inp):
 		return self.v
+		
+	def display(self, indent=0):
+		print '%s%d' % (' '*indent, self.v)
 		
 addw = fwrapper(lambda l:l[0] + l[1], 2, 'add')
 subw = fwrapper(lambda l:l[0] - l[1], 2, 'subtract')
@@ -56,6 +67,15 @@ def exampletree():
 		node(subw, [paramnode(1), constnode(2)]),
 		])
 		
+def makerandomtree(pc, maxdepth=4, fpr=0.5, ppr=0.6):
+	if random() < fpr and maxdepth>0:
+		f=choice(flist)
+		children=[makerandomtree(pc, maxdepth-1, fpr,ppr) for i in range(f.childcount)]
+		return node(f, children)
+	elif random() < ppr:
+		return paramnode(randint(0, pc-1))
+	else:
+		return constnode(randint(0,10))
 #main
 #exampletree  = exampletree()
 #exampletree.evaluate([2,3])
