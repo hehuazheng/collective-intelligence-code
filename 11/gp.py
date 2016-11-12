@@ -2,7 +2,6 @@
 from random import random,randint,choice
 from copy import deepcopy
 from math import log
-
 class fwrapper:
 	def __init__(self, function, childcount, name):
 		self.function = function
@@ -103,6 +102,46 @@ def mutate(t, pc, probchange=0.1):
 		if isinstance(t, node):
 			result.children = [mutate(c, pc, probchange) for c in t.children]
 		return result
+
+def crossover(t1, t2, probswap=0.7, top = 1):
+	if random() < probswap and not top:
+		return deepcopy(t2)
+	else:
+		result = deepcopy(t1)
+		if isinstance(t1, node) and isinstance(t2, node):
+			result.children=[crossover(c, choice(t2.children), probswap, 0) for c in t1.children]
+		return result
+		
+def evolve(pc, popsize, rankfunction, maxgen=500, mutationrate=0.1, breedingrate=0.4, pexp=0.7, pnew=0.5):
+	#返回一个随机数， 通常是一个比较小的数
+	# pexp取值越小，得到的随机数就越小
+	def selectindex():
+		return int(log(random())/log(pexp))
+	# 创建一个随机的初始种群
+	population = [makerandomtree(pc) for i in range(popsize)]
+	for i in range(maxgen):
+		scores = rankfunction(population)
+		print scores[0][0]
+		if scores[0][0] == 0: break
+		#总能得到两个最优的程序
+		newpop = [scores[0][1], scores[1][1]]
+		#构造下一代
+		while len(newpop) < popsize:
+			if random() > pnew:
+				newpop.append(mutate(crossover(scores[selectindex()][1], scores[selectindex()][1], probswap=breedingrate), pc, probchange=mutationrate))
+			else:
+				#加入一个随机节点，以增加种群的多样性
+				newpop.append(makerandomtree(pc))
+		population = newpop
+	scores[0][1].display()
+	return scores[0][1]
+	
+def getrankfunction(dataset):
+	def rankfunction(population):
+		scores=[(scorefunction(t, dataset), t) for t in population]
+		scores.sort()
+		return scores
+	return rankfunction
 #main
 #exampletree  = exampletree()
 #exampletree.evaluate([2,3])
